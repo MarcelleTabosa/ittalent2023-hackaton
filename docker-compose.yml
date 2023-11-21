@@ -1,0 +1,56 @@
+version: '3.1'
+
+networks:
+  api-mongo:
+    driver: bridge
+
+volumes:
+  db:
+
+services:
+  db:
+    container_name: db
+    image: mongo
+    restart: always
+    networks:
+      - api-mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - db:/data/db
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+          
+  api:
+    container_name: api
+    image: marcelletabosa/hackanton2
+    restart: always
+    ports:
+      - 9080:9080
+    networks:
+      - api-mongo
+    depends_on:
+      - db
+    environment:
+      MONGO_DB_HOST: db
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+
+  client:
+    container_name: client
+    image: ubuntu:latest
+    restart: always
+    networks:
+      - api-mongo
+    tty: true
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
